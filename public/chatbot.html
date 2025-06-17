@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Health & Diet Chatbot</title>
+  <link rel="stylesheet" href="chatbot.css" />
+</head>
+<body>
+  <div class="chatbot-container">
+    <h2>Health & Diet Assistant 🤖</h2>
+    <div id="chat-box" class="chat-box">
+      <div class="message bot"><strong>Bot:</strong> Hello! I'm your health assistant. Ask me anything about diet, fitness, calories, or symptoms. 😊</div>
+    </div>
+    <div class="input-area">
+      <input type="text" id="user-input" placeholder="Ask me about your diet, weight loss, etc..." autofocus />
+      <button id="send-btn">Send</button>
+    </div>
+  </div>
+
+  <!-- Button to go back to Health Tracker website -->
+  <div class="back-button">
+    <button id="back-btn">Go to Health Tracker</button>
+  </div>
+  <script>
+    const chatBox = document.getElementById('chat-box');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const backBtn = document.getElementById('back-btn');
+
+    const predefinedQA = {
+      "What is a healthy diet?": "A healthy diet includes a variety of foods: fruits, vegetables, lean proteins, whole grains, and healthy fats. It's about balance and moderation.",
+      "How can I lose weight?": "To lose weight, create a calorie deficit by consuming fewer calories than your body burns. This can be achieved by a balanced diet and regular exercise.",
+      "What are the symptoms of vitamin D deficiency?": "Symptoms of vitamin D deficiency include fatigue, bone pain, muscle weakness, and an increased risk of infections.",
+      "How many calories should I eat per day?": "The average adult needs between 1,800 to 2,400 calories per day, but this varies depending on factors like age, gender, and physical activity level.",
+      "What are some good sources of protein?": "Good sources of protein include chicken, fish, eggs, beans, lentils, and tofu.",
+      "How much water should I drink daily?": "It's generally recommended to drink at least 8 cups (2 liters) of water a day, but this can vary based on activity level and climate.",
+      "What is BMI?": "BMI (Body Mass Index) is a measure of body fat based on height and weight. It's used to categorize individuals as underweight, normal weight, overweight, or obese.",
+      "What are healthy snacks?": "Healthy snacks include fruits, nuts, yogurt, and whole-grain crackers. They provide energy and nutrients without excessive calories.",
+      "How can I improve my metabolism?": "To boost metabolism, engage in regular physical activity, eat enough protein, stay hydrated, and get enough sleep.",
+      "What is the best time to exercise?": "The best time to exercise is when it fits your schedule and you can be consistent. Morning, afternoon, or evening workouts can all be effective.",
+      "How can I manage stress?": "Stress management techniques include exercise, meditation, deep breathing, and spending time with loved ones.",
+      "What are the benefits of fiber?": "Fiber aids digestion, helps maintain a healthy weight, and lowers the risk of chronic diseases like heart disease and diabetes.",
+      "How can I improve my sleep?": "To improve sleep, maintain a regular sleep schedule, create a relaxing bedtime routine, and limit screen time before bed.",
+      "What are the signs of dehydration?": "Signs of dehydration include thirst, dry mouth, fatigue, dizziness, and dark yellow urine.",
+      "hi": "Hello! How can I assist you today?",
+      "hello": "Hi there! What can I help you with?",
+      "help": "I'm here to help! Ask me anything about diet, fitness, or health.",
+      "thank you": "You're welcome! If you have more questions, feel free to ask.",
+      "bye": "Goodbye! Take care and stay healthy!",
+      "goodbye": "Goodbye! If you need assistance later, just ask."
+    };
+
+    const keywordResponses = [
+      { keywords: ["healthy diet", "balanced diet"], answer: "A healthy diet includes fruits, vegetables, whole grains, lean protein, and healthy fats in the right proportions." },
+      { keywords: ["weight loss", "lose weight"], answer: "To lose weight, eat fewer calories than you burn. Focus on whole foods, avoid sugar, and stay active." },
+      { keywords: ["protein"], answer: "Good protein sources include eggs, chicken, beans, lentils, tofu, fish, and Greek yogurt." },
+      { keywords: ["carbs", "carbohydrates"], answer: "Choose complex carbs like oats, brown rice, and sweet potatoes over refined carbs like white bread and sugar." },
+      { keywords: ["fat", "fats"], answer: "Healthy fats include avocados, olive oil, nuts, and seeds. Avoid trans fats." },
+      { keywords: ["vitamin", "minerals"], answer: "Fruits and vegetables are great sources of essential vitamins and minerals." },
+      { keywords: ["hydration", "water"], answer: "Drink at least 8 cups (2 liters) of water a day, more if you are active." },
+      { keywords: ["meal plan", "diet plan"], answer: "A good meal plan balances nutrients and suits your lifestyle. Try 3 meals and 1–2 snacks a day." },
+      { keywords: ["keto"], answer: "The keto diet is low in carbs and high in fat to encourage the body to burn fat for energy (ketosis)." },
+      { keywords: ["vegan"], answer: "A vegan diet avoids all animal products. Focus on beans, grains, fruits, and vegetables." },
+      { keywords: ["fiber"], answer: "Fiber helps with digestion. Found in fruits, vegetables, oats, beans, and whole grains." },
+      { keywords: ["intermittent fasting"], answer: "It involves eating within specific time windows, like 16:8. It may help with weight control." },
+      { keywords: ["portion"], answer: "Control portions by using smaller plates and eating slowly." },
+      { keywords: ["calories"], answer: "Your calorie needs depend on your age, weight, height, gender, and activity level." },
+      { keywords: ["hi", "hello", "hey"], answer: "Hello! 👋 How can I help with your diet or health today?" },
+      { keywords: ["how are you"], answer: "I'm just a chatbot, but I'm here to help you stay healthy! 😊" },
+      { keywords: ["thank you", "thanks"], answer: "You're welcome! Stay healthy and happy! 🌟" },
+      { keywords: ["bye", "goodbye", "see you"], answer: "Goodbye! Come back anytime you have a health or diet question! 👋" },
+      { keywords: ["help"], answer: "You can ask me about nutrition, healthy meals, calories, weight loss, or fitness tips!" },
+      { keywords: ["healthy diet", "balanced diet"], answer: predefinedQA["What is a healthy diet?"] },
+      { keywords: ["lose weight", "weight loss"], answer: predefinedQA["How can I lose weight?"] },
+      { keywords: ["vitamin d", "deficiency symptoms"], answer: predefinedQA["What are the symptoms of vitamin D deficiency?"] },
+      { keywords: ["calories", "per day"], answer: predefinedQA["How many calories should I eat per day?"] },
+      { keywords: ["protein", "protein source"], answer: predefinedQA["What are some good sources of protein?"] },
+      { keywords: ["water", "hydration"], answer: predefinedQA["How much water should I drink daily?"] },
+      { keywords: ["bmi", "body mass index"], answer: predefinedQA["What is BMI?"] },
+      { keywords: ["healthy snacks", "snack"], answer: predefinedQA["What are healthy snacks?"] },
+      { keywords: ["metabolism", "boost metabolism"], answer: predefinedQA["How can I improve my metabolism?"] },
+      { keywords: ["exercise time", "when to exercise"], answer: predefinedQA["What is the best time to exercise?"] },
+      { keywords: ["stress", "manage stress"], answer: predefinedQA["How can I manage stress?"] },
+      { keywords: ["fiber", "benefits of fiber"], answer: predefinedQA["What are the benefits of fiber?"] },
+      { keywords: ["sleep", "improve sleep"], answer: predefinedQA["How can I improve my sleep?"] },
+      { keywords: ["dehydration", "signs of dehydration"], answer: predefinedQA["What are the signs of dehydration?"] },
+      { keywords: ["hi", "hello"], answer: predefinedQA["hi"] },
+      { keywords: ["thank"], answer: predefinedQA["thank you"] },
+      { keywords: ["bye", "goodbye"], answer: predefinedQA["bye"] },
+      { keywords: ["help"], answer: predefinedQA["help"] }
+    ];
+
+    function getPredefinedResponse(userMessage) {
+      const lowerMsg = userMessage.toLowerCase();
+      for (const entry of keywordResponses) {
+        if (entry.keywords.some(keyword => lowerMsg.includes(keyword))) {
+          return entry.answer;
+        }
+      }
+      return "I'm still learning. Could you rephrase or ask a different question?";
+    }
+
+    function appendMessage(sender, message) {
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('message');
+      messageDiv.classList.add(sender === 'Bot' ? 'bot' : 'user');
+      messageDiv.innerHTML = `<strong>${sender}:</strong> ${message}`;
+      chatBox.appendChild(messageDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+      const typingDiv = document.createElement('div');
+      typingDiv.classList.add('message', 'bot');
+      typingDiv.id = 'typing';
+      typingDiv.innerHTML = "<strong>Bot:</strong> <em>typing...</em>";
+      chatBox.appendChild(typingDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+      const typing = document.getElementById('typing');
+      if (typing) typing.remove();
+    }
+
+    async function sendMessage() {
+      const userMessage = userInput.value.trim();
+      if (userMessage === '') return;
+
+      appendMessage('You', userMessage);
+      userInput.value = '';
+      showTypingIndicator();
+
+      const botResponse = getPredefinedResponse(userMessage);
+
+      setTimeout(() => {
+        removeTypingIndicator();
+        appendMessage('Bot', botResponse);
+      }, 1000);
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    userInput.addEventListener('keypress', function (event) {
+      if (event.key === 'Enter') sendMessage();
+    });
+
+    backBtn.addEventListener('click', function () {
+      window.location.href = "index.html";
+    });
+  </script>
+</body>
+</html>

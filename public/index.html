@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Health Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Daily Dietary Tracker</h1>
+    <button id="logout-btn">Logout</button>
+
+    <!-- User Info Form -->
+    <form id="user-info-form">
+      <h3>Enter your details</h3>
+      <input type="number" id="user-weight" placeholder="Weight (kg)" required />
+      <input type="number" id="user-height" placeholder="Height (cm)" required />
+      <button type="submit">Set Limit</button>
+    </form>
+    <p id="calorie-limit-info" style="font-weight: bold;"></p>
+
+    <!-- Food Entry Form -->
+    <form id="food-form">
+      <input type="text" id="food-name" placeholder="Enter food name" required />
+      <button type="button" id="fetch-nutrition">Get Nutrition</button>
+      <input type="number" id="calories" placeholder="Calories" step="any" required />
+      <input type="number" id="protein" placeholder="Protein (g)" step="any" required />
+      <input type="number" id="carbs" placeholder="Carbs (g)" step="any" required />
+      <input type="number" id="fats" placeholder="Fats (g)" step="any" required />
+      <button type="submit">Add Food</button>
+    </form>
+
+    <!-- Daily Log -->
+    <h2>Daily Log</h2>
+    <a href="chatbot.html" target="_blank" id="chatbot-icon">💬</a>  
+    <ul id="food-list"></ul>
+
+    <!-- Total Intake -->
+    <h2>Total Intake</h2>
+    <p>Calories: <span id="total-calories">0</span></p>
+    <p>Protein: <span id="total-protein">0</span>g</p>
+    <p>Carbs: <span id="total-carbs">0</span>g</p>
+    <p>Fats: <span id="total-fats">0</span>g</p>
+  </div>
+
+  <script>
+    // Logout
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      alert("Logged out successfully!");
+      window.location.href = "login.html";
+    });
+
+    let calorieLimit = 0;
+
+    // Set Calorie Limit
+    document.getElementById('user-info-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const weight = parseFloat(document.getElementById('user-weight').value);
+      const height = parseFloat(document.getElementById('user-height').value);
+
+      if (isNaN(weight) || isNaN(height) || weight <= 0 || height <= 0) {
+        alert("Please enter valid weight and height.");
+        return;
+      }
+
+      const age = 25;
+      const bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+      calorieLimit = Math.round(bmr * 1.2);
+
+      document.getElementById('calorie-limit-info').textContent =
+        `Your daily calorie limit is approximately ${calorieLimit} kcal.`;
+    });
+
+    // Fetch Nutrition from Nutritionix
+    document.getElementById('fetch-nutrition').addEventListener('click', () => {
+      const foodName = document.getElementById('food-name').value.trim();
+      if (!foodName) {
+        alert("Please enter a food name.");
+        return;
+      }
+
+      const appId = '28983caa'; // Replace with your Nutritionix App ID
+      const appKey = '2c6a6647a6934ad09761a5e162905e9f'; // Replace with your Nutritionix API Key
+
+      fetch("https://trackapi.nutritionix.com/v2/natural/nutrients", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-app-id": appId,
+          "x-app-key": appKey
+        },
+        body: JSON.stringify({ query: foodName })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.foods && data.foods.length > 0) {
+          const food = data.foods[0];
+          document.getElementById('calories').value = food.nf_calories.toFixed(1);
+          document.getElementById('protein').value = food.nf_protein.toFixed(1);
+          document.getElementById('carbs').value = food.nf_total_carbohydrate.toFixed(1);
+          document.getElementById('fats').value = food.nf_total_fat.toFixed(1);
+        } else {
+          alert("No nutrition data found for this item.");
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching nutrition:", error);
+        alert("Failed to fetch nutrition data.");
+      });
+    });
+
+    // Add Food Entry
+    document.getElementById('food-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const foodName = document.getElementById('food-name').value.trim();
+      const calories = parseFloat(document.getElementById('calories').value);
+      const protein = parseFloat(document.getElementById('protein').value);
+      const carbs = parseFloat(document.getElementById('carbs').value);
+      const fats = parseFloat(document.getElementById('fats').value);
+
+      if (!foodName || isNaN(calories) || isNaN(protein) || isNaN(carbs) || isNaN(fats)) {
+        alert("Please enter valid values for all fields.");
+        return;
+      }
+
+      const li = document.createElement('li');
+      li.textContent = `${foodName} - ${calories} kcal, ${protein}g protein, ${carbs}g carbs, ${fats}g fats`;
+      document.getElementById('food-list').appendChild(li);
+
+      const totalCaloriesEl = document.getElementById('total-calories');
+      const totalProteinEl = document.getElementById('total-protein');
+      const totalCarbsEl = document.getElementById('total-carbs');
+      const totalFatsEl = document.getElementById('total-fats');
+
+      totalCaloriesEl.textContent = (parseFloat(totalCaloriesEl.textContent) + calories).toFixed(1);
+      totalProteinEl.textContent = (parseFloat(totalProteinEl.textContent) + protein).toFixed(1);
+      totalCarbsEl.textContent = (parseFloat(totalCarbsEl.textContent) + carbs).toFixed(1);
+      totalFatsEl.textContent = (parseFloat(totalFatsEl.textContent) + fats).toFixed(1);
+
+      if (calorieLimit > 0 && parseFloat(totalCaloriesEl.textContent) > calorieLimit) {
+        alert("Warning: You have exceeded your daily calorie limit!");
+      }
+
+      document.getElementById('food-form').reset();
+    });
+  </script>
+</body>
+</html>

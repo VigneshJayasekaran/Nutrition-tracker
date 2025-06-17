@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Health Tracker</title>
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Login to Health Tracker</h1>
+    <form id="login-form">
+      <input type="text" id="username" placeholder="Enter Username" required>
+      <input type="number" id="age" placeholder="Enter Age" required>
+      <button type="submit">Login</button>
+    </form>
+  </div>
+
+  <script>
+    // If user exists, pre-fill the form
+    const existingUser = JSON.parse(localStorage.getItem('user'));
+    if (existingUser) {
+      document.getElementById('username').value = existingUser.username;
+      document.getElementById('age').value = existingUser.age;
+    }
+
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const age = document.getElementById('age').value;
+      // Save user data to localStorage
+      localStorage.setItem('user', JSON.stringify({ username, age }));
+
+      // Redirect to the tracker page
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>
