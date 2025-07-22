@@ -125,20 +125,44 @@
     }
 
     async function sendMessage() {
-      const userMessage = userInput.value.trim();
-      if (userMessage === '') return;
+  const userMessage = userInput.value.trim();
+  if (userMessage === '') return;
 
-      appendMessage('You', userMessage);
-      userInput.value = '';
-      showTypingIndicator();
+  appendMessage('You', userMessage);
+  userInput.value = '';
+  showTypingIndicator();
 
-      const botResponse = getPredefinedResponse(userMessage);
+  const botResponse = getPredefinedResponse(userMessage);
 
-      setTimeout(() => {
-        removeTypingIndicator();
-        appendMessage('Bot', botResponse);
-      }, 1000);
+  setTimeout(() => {
+    removeTypingIndicator();
+    typeBotMessage(botResponse);
+  }, 1000);
+}
+
+function typeBotMessage(message) {
+  const messageDiv = document.createElement('div');
+  messageDiv.classList.add('message', 'bot');
+  const strongTag = document.createElement('strong');
+  strongTag.innerText = "Bot: ";
+  const span = document.createElement('span');
+  messageDiv.appendChild(strongTag);
+  messageDiv.appendChild(span);
+  chatBox.appendChild(messageDiv);
+
+  let index = 0;
+
+  function type() {
+    if (index < message.length) {
+      span.innerHTML += message.charAt(index);
+      index++;
+      chatBox.scrollTop = chatBox.scrollHeight;
+      setTimeout(type, 30); // typing speed (lower = faster)
     }
+  }
+  type();
+}
+
 
     sendBtn.addEventListener('click', sendMessage);
     userInput.addEventListener('keypress', function (event) {
